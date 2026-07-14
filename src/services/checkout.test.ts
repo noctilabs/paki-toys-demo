@@ -7,6 +7,7 @@ import {
   isValidCnpj,
   normalizeDigits,
   orderStatusSteps,
+  paymentTermLabel,
   restoreOrderCart,
   validateCheckoutStep,
   validateCompany,
@@ -137,6 +138,12 @@ describe("checkout services", () => {
       { status: "invoiced", state: "upcoming" },
       { status: "shipped", state: "upcoming" },
     ])
+  })
+
+  it("provides clear labels for saved commercial terms", () => {
+    expect(paymentTermLabel("pix")).toBe("PIX à vista")
+    expect(paymentTermLabel("boleto-28")).toBe("Boleto faturado em 28 dias")
+    expect(paymentTermLabel("commercial")).toBe("Negociação comercial")
   })
 
   it("restores available order products and reports missing products", () => {

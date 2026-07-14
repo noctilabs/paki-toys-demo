@@ -5,6 +5,9 @@ import { Checkout } from "./components/checkout"
 import { Footer } from "./components/footer"
 import { Header } from "./components/header"
 import { Hero } from "./components/hero"
+import { OrderConfirmation } from "./components/order-confirmation"
+import { OrderDetail } from "./components/order-detail"
+import { OrderHistory } from "./components/order-history"
 import { ProductGrid } from "./components/product-grid"
 import { Promotion } from "./components/promotion"
 import { QuickView } from "./components/quick-view"
@@ -22,7 +25,7 @@ import {
   removeCartItem,
 } from "./services/cart"
 import { filterProducts } from "./services/catalog"
-import { createWholesaleOrder, emptyCheckoutDraft } from "./services/checkout"
+import { createWholesaleOrder, emptyCheckoutDraft, restoreOrderCart } from "./services/checkout"
 
 type AppView = "storefront" | "checkout" | "confirmation" | "orders" | "order-detail"
 
@@ -49,6 +52,11 @@ export default function App() {
   const [confirmedOrder, setConfirmedOrder] = useState<WholesaleOrder | null>(null)
   const [submittingOrder, setSubmittingOrder] = useState(false)
   const [submitError, setSubmitError] = useState("")
+  const [orders, setOrders] = useState<WholesaleOrder[]>([])
+  const [ordersLoading, setOrdersLoading] = useState(false)
+  const [ordersError, setOrdersError] = useState("")
+  const [selectedOrder, setSelectedOrder] = useState<WholesaleOrder | null>(null)
+  const [reorderNotice, setReorderNotice] = useState("")
   const orderRepository = useMemo(() => new LocalOrderRepository(window.localStorage), [])
 
   useEffect(() => {
@@ -133,6 +141,41 @@ export default function App() {
     }
   }
 
+  async function openOrders() {
+    setView("orders")
+    setOrdersLoading(true)
+    setOrdersError("")
+    window.scrollTo({ top: 0 })
+    try {
+      setOrders(await orderRepository.listOrders())
+    } catch {
+      setOrdersError("O armazenamento deste navegador não está disponível. Tente novamente em outro navegador.")
+    } finally {
+      setOrdersLoading(false)
+    }
+  }
+
+  function openOrder(order: WholesaleOrder) {
+    setSelectedOrder(order)
+    setReorderNotice("")
+    setView("order-detail")
+    window.scrollTo({ top: 0 })
+  }
+
+  function reorder(order: WholesaleOrder) {
+    const restored = restoreOrderCart(order, products)
+    if (restored.lines.length === 0) {
+      setReorderNotice("Os produtos deste pedido não estão mais disponíveis no catálogo da demonstração.")
+      return
+    }
+
+    setCartLines(restored.lines)
+    setReorderNotice(restored.missingProductTitles.length > 0
+      ? `Alguns produtos não estavam disponíveis: ${restored.missingProductTitles.join(", ")}.`
+      : "Pedido restaurado na sacola em caixas.")
+    showStorefront(true)
+  }
+
   if (view === "checkout") {
     return (
       <Checkout
@@ -150,25 +193,36 @@ export default function App() {
 
   if (view === "confirmation" && confirmedOrder) {
     return (
-      <main className="checkout-page simple-app-view">
-        <img src="/paki/logo.webp" alt="Paki Toys" />
-        <span className="section-kicker">Pedido recebido</span>
-        <h1>{confirmedOrder.reference}</h1>
-        <p>Recebemos a solicitação de {confirmedOrder.company.tradeName || confirmedOrder.company.legalName} para análise comercial.</p>
-        <div><button className="button button--red" type="button" onClick={() => setView("orders")}>Meus pedidos</button><button className="button button--ghost" type="button" onClick={() => showStorefront(false)}>Voltar à loja</button></div>
-      </main>
+      <OrderConfirmation
+        order={confirmedOrder}
+        onViewOrder={() => openOrder(confirmedOrder)}
+        onOpenOrders={() => { void openOrders() }}
+        onStorefront={() => showStorefront(false)}
+      />
     )
   }
 
-  if (view === "orders" || view === "order-detail") {
+  if (view === "orders") {
     return (
-      <main className="checkout-page simple-app-view">
-        <img src="/paki/logo.webp" alt="Paki Toys" />
-        <span className="section-kicker">Área do lojista</span>
-        <h1>Meus pedidos</h1>
-        <p>O histórico detalhado será carregado a partir deste navegador.</p>
-        <button className="button button--blue" type="button" onClick={() => showStorefront(false)}>Voltar à loja</button>
-      </main>
+      <OrderHistory
+        orders={orders}
+        loading={ordersLoading}
+        error={ordersError}
+        onOpenOrder={openOrder}
+        onStorefront={() => showStorefront(false)}
+      />
+    )
+  }
+
+  if (view === "order-detail" && selectedOrder) {
+    return (
+      <OrderDetail
+        order={selectedOrder}
+        reorderNotice={reorderNotice}
+        onBack={() => { void openOrders() }}
+        onReorder={() => reorder(selectedOrder)}
+        onStorefront={() => showStorefront(false)}
+      />
     )
   }
 
@@ -181,10 +235,11 @@ export default function App() {
         cartCount={cartCount}
         cartOpen={cartOpen}
         onCartOpen={() => setCartOpen(true)}
-        onOrdersOpen={() => setView("orders")}
+        onOrdersOpen={() => { void openOrders() }}
         mobileMenuOpen={mobileMenuOpen}
         onMobileMenuToggle={() => setMobileMenuOpen((current) => !current)}
       />
+      {reorderNotice && <div className="storefront-notice" role="status"><span>{reorderNotice}</span><button type="button" onClick={() => setReorderNotice("")} aria-label="Fechar aviso">×</button></div>}
       <main>
         <Hero onExplore={() => document.getElementById("produtos")?.scrollIntoView({ behavior: "smooth" })} />
         <CategoryRail categories={categories} activeCategory={activeCategory} onSelect={selectCategory} />

@@ -21,6 +21,12 @@ const statusDefinitions: Array<Pick<OrderStatusStep, "status" | "label" | "descr
   { status: "shipped", label: "Enviado", description: "Mercadoria entregue à transportadora." },
 ]
 
+const paymentTermLabels: Record<PaymentTerm, string> = {
+  pix: "PIX à vista",
+  "boleto-28": "Boleto faturado em 28 dias",
+  commercial: "Negociação comercial",
+}
+
 export const emptyCheckoutDraft: CheckoutDraft = {
   company: {
     cnpj: "",
@@ -89,6 +95,10 @@ export function validateDelivery(delivery: DeliveryAddress): FieldErrors<Deliver
 
 export function validateTerms(paymentTerm: PaymentTerm | "") {
   return paymentTerm ? {} : { paymentTerm: "Escolha uma condição comercial." }
+}
+
+export function paymentTermLabel(paymentTerm: PaymentTerm) {
+  return paymentTermLabels[paymentTerm]
 }
 
 export type CheckoutStep = "company" | "delivery" | "terms" | "review"
