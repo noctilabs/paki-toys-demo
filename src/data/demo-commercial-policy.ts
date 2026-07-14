@@ -1,0 +1,75 @@
+import type { DemoCommercialPolicy } from "../domain/commercial"
+
+export const demoCommercialPolicy: DemoCommercialPolicy = {
+  minimumOrder: 1500,
+  tiers: [
+    { minBoxes: 1, maxBoxes: 2, discountRate: 0, label: "Preço Parceiro" },
+    { minBoxes: 3, maxBoxes: 5, discountRate: 0.05, label: "Volume 5%" },
+    { minBoxes: 6, discountRate: 0.08, label: "Volume 8%" },
+  ],
+  availability: {
+    "2082": 18,
+    "4115": 24,
+    "1501": 20,
+    "1544": 36,
+    "3055": 14,
+    "4001": 22,
+    "4100": 16,
+    "4016": 19,
+    "1281": 28,
+    "1214": 12,
+    "3092": 15,
+    "1504": 21,
+  },
+  freightOptions: [
+    {
+      id: "economy",
+      title: "Transportadora econômica",
+      price: 189,
+      estimate: "5–7 dias úteis",
+      description: "Melhor equilíbrio entre prazo e custo.",
+    },
+    {
+      id: "express",
+      title: "Transportadora expressa",
+      price: 329,
+      estimate: "2–3 dias úteis",
+      description: "Prioridade para reposições urgentes.",
+    },
+    {
+      id: "pickup",
+      title: "Retirada programada",
+      price: 0,
+      estimate: "Cerca de 2 dias úteis",
+      description: "Retirada após confirmação da equipe Paki.",
+    },
+  ],
+  exampleOrder: [
+    { productId: "1214", boxCount: 3 },
+    { productId: "1544", boxCount: 3 },
+    { productId: "4115", boxCount: 2 },
+  ],
+  retailerProfile: {
+    company: {
+      cnpj: "11.222.333/0001-81",
+      legalName: "Brinquedos Aurora Comércio Demonstrativo Ltda.",
+      tradeName: "Aurora Kids · Empresa de demonstração",
+      stateRegistration: "ISENTO",
+      buyerName: "Comprador de demonstração",
+      email: "compras@example.com",
+      phone: "(11) 99999-0000",
+    },
+    delivery: {
+      postalCode: "01310-100",
+      street: "Avenida Paulista",
+      number: "1000",
+      complement: "Loja demonstrativa",
+      neighborhood: "Bela Vista",
+      city: "São Paulo",
+      state: "SP",
+      contactName: "Recebimento de demonstração",
+      instructions: "Entregar pela entrada comercial.",
+    },
+    commercialTier: "gold",
+  },
+}
