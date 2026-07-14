@@ -6,7 +6,7 @@ Create a polished, clickable Portuguese-language storefront demo for Paki Toys. 
 
 ## Scope
 
-The demo is a responsive React/Vite frontend with mock catalog data. It includes the homepage, product discovery interactions, product quick view, favorites, and a client-side cart drawer. It does not include checkout, authentication, a CMS, persistence across devices, or a running Medusa backend.
+The demo is a responsive React/Vite frontend with local catalog data derived from `adrianmircus/pakitoys-medusa-b2b`. It includes the homepage, product discovery interactions, product quick view, favorites, and a client-side cart drawer. It does not include checkout, authentication, a CMS, persistence across devices, or a running Medusa backend.
 
 ## Visual Direction
 
@@ -20,7 +20,7 @@ The page combines generous white space with oversized playful shapes, sticker-li
 2. Responsive header with logo, category navigation, search, favorites, and cart count.
 3. Editorial hero with a primary catalog call to action and featured Paki product imagery.
 4. Category cards for Maletas, Imaginação, Jogos, Motora, Paki Baby, Senninha, and Monta Roda.
-5. Featured product grid using current Paki Toys imagery and representative product names.
+5. Featured product grid using the Paki Toys logo, product imagery, product names, and metadata from the reference repository.
 6. Brand-value section focused on learning, imagination, motor development, and safe play.
 7. Promotional banner and catalog call to action.
 8. Newsletter prompt and a substantial company/contact footer.
@@ -36,6 +36,12 @@ The page combines generous white space with oversized playful shapes, sticker-li
 - Cart and favorite state live in the browser for the current session only.
 - Product and category links remain within the single-page demo and do not imply completed routes.
 
+## Asset and Catalog Source
+
+The Paki Toys assets and catalog reference come from `https://github.com/adrianmircus/pakitoys-medusa-b2b`. The implementation copies the repository's Paki logo and 12 WebP product images into this project's public assets; it does not hotlink them from GitHub or the live Paki Toys site.
+
+The initial catalog preserves the source repository's product names, handles, categories, age ranges, reference numbers, EAN/DUN values, case quantities, dimensions, weight, and cubage. The primary storefront surfaces only customer-friendly information such as title, category, age guidance, image, and demo price. The remaining B2B fields stay in the domain model so a later Medusa connection can support wholesale workflows without reworking the product schema.
+
 ## Architecture
 
 The project uses React, TypeScript, and Vite. UI components consume a small catalog repository interface rather than importing mock arrays directly. The initial repository returns local data synchronously or through an async-compatible API. A future Medusa adapter can implement the same interface and map Medusa product/category responses into the demo's domain types.
@@ -43,7 +49,7 @@ The project uses React, TypeScript, and Vite. UI components consume a small cata
 The main units are:
 
 - `domain`: product and category types used by the UI.
-- `data`: mock catalog content and the repository implementation.
+- `data`: local catalog content transcribed from the reference repository and the repository implementation.
 - `services`: cart calculations and catalog querying kept independent of rendering.
 - `components`: focused UI pieces such as header, hero, category rail, product card, quick-view modal, cart drawer, and footer.
 - `App`: page composition and top-level interaction state.
@@ -53,7 +59,7 @@ No speculative API client, authentication layer, routing system, or backend conf
 ## Error and Empty States
 
 - A search or category filter with no results shows a friendly reset action.
-- Missing product images fall back to a branded placeholder.
+- Missing product images fall back to a branded placeholder, although all 12 reference products are expected to use their copied WebP assets.
 - Cart quantity cannot fall below one; removing the final unit removes the line.
 - Checkout remains visibly marked as unavailable in the demo instead of leading to a broken flow.
 
@@ -68,6 +74,7 @@ No speculative API client, authentication layer, routing system, or backend conf
 ## Verification
 
 - TypeScript compilation and the production build succeed.
+- All copied logo and product assets load locally with no GitHub or Paki-site hotlinks.
 - Component/service tests cover search filtering and cart calculations.
 - Browser verification confirms navigation, category filtering, search, favorites, quick view, cart updates, drawer controls, and empty results.
 - Desktop and mobile screenshots are visually reviewed for overflow, hierarchy, spacing, and legibility.
