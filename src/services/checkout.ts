@@ -91,6 +91,15 @@ export function validateTerms(paymentTerm: PaymentTerm | "") {
   return paymentTerm ? {} : { paymentTerm: "Escolha uma condição comercial." }
 }
 
+export type CheckoutStep = "company" | "delivery" | "terms" | "review"
+
+export function validateCheckoutStep(step: CheckoutStep, draft: CheckoutDraft) {
+  if (step === "company") return validateCompany(draft.company)
+  if (step === "delivery") return validateDelivery(draft.delivery)
+  if (step === "terms") return validateTerms(draft.paymentTerm)
+  return {}
+}
+
 export function canSubmitCheckout(draft: CheckoutDraft, lines: CartLine[]) {
   return lines.length > 0
     && Object.keys(validateCompany(draft.company)).length === 0

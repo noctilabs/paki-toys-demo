@@ -7,6 +7,7 @@ type HeaderProps = {
   cartCount: number
   cartOpen: boolean
   onCartOpen: () => void
+  onOrdersOpen: () => void
   mobileMenuOpen: boolean
   onMobileMenuToggle: () => void
 }
@@ -24,6 +25,7 @@ export function Header({
   cartCount,
   cartOpen,
   onCartOpen,
+  onOrdersOpen,
   mobileMenuOpen,
   onMobileMenuToggle,
 }: HeaderProps) {
@@ -55,11 +57,12 @@ export function Header({
                 placeholder="Buscar brinquedo"
               />
             </label>
+            <button className="orders-link desktop-only" type="button" onClick={onOrdersOpen}>Meus pedidos</button>
             <a className="icon-button desktop-only" href="#produtos" aria-label={`${favoriteCount} brinquedos favoritos`}>
               <HeartIcon filled={favoriteCount > 0} />
               {favoriteCount > 0 && <span className="count-badge">{favoriteCount}</span>}
             </a>
-            <button className="icon-button" type="button" onClick={onCartOpen} aria-label={`Abrir sacola com ${cartCount} itens`} aria-expanded={cartOpen}>
+            <button className="icon-button" type="button" onClick={onCartOpen} aria-label={`Abrir sacola com ${cartCount} caixas`} aria-expanded={cartOpen}>
               <BagIcon />
               {cartCount > 0 && <span className="count-badge">{cartCount}</span>}
             </button>
@@ -72,6 +75,7 @@ export function Header({
         {mobileMenuOpen && (
           <nav className="mobile-nav" aria-label="Navegação móvel">
             {navigation.map((item) => <a key={item.href} href={item.href} onClick={onMobileMenuToggle}>{item.label}</a>)}
+            <button type="button" onClick={() => { onMobileMenuToggle(); onOrdersOpen() }}>Meus pedidos</button>
           </nav>
         )}
       </header>

@@ -8,6 +8,7 @@ import {
   normalizeDigits,
   orderStatusSteps,
   restoreOrderCart,
+  validateCheckoutStep,
   validateCompany,
   validateDelivery,
   validateTerms,
@@ -90,6 +91,15 @@ describe("checkout services", () => {
     expect(canSubmitCheckout(validDraft, cart)).toBe(true)
     expect(canSubmitCheckout({ ...validDraft, paymentTerm: "" }, cart)).toBe(false)
     expect(canSubmitCheckout(validDraft, [])).toBe(false)
+  })
+
+  it("validates only the active checkout step", () => {
+    expect(validateCheckoutStep("company", validDraft)).toEqual({})
+    expect(validateCheckoutStep("delivery", validDraft)).toEqual({})
+    expect(validateCheckoutStep("terms", validDraft)).toEqual({})
+    expect(validateCheckoutStep("company", { ...validDraft, company: { ...validDraft.company, cnpj: "" } })).toEqual({
+      cnpj: "Informe um CNPJ válido.",
+    })
   })
 
   it("creates an immutable wholesale order snapshot", () => {
