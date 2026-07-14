@@ -114,6 +114,15 @@ describe("demonstration commercial policy", () => {
     expect(incomplete.missingProductIds).toEqual(["1214"])
   })
 
+  it("builds a presentation-ready example order", () => {
+    const example = buildExampleCart(pakiProducts)
+    const totals = calculateCommercialTotals(example.lines)
+
+    expect(calculateMinimumProgress(totals.merchandiseSubtotal).reached).toBe(true)
+    expect(example.lines.some((line) => priceCommercialLine(line).discountRate > 0)).toBe(true)
+    expect(example.lines.every((line) => !isAvailabilityUnderReview(line.product.id, line.quantity))).toBe(true)
+  })
+
   it("returns a cloned demo retailer checkout draft", () => {
     const first = getDemoRetailerDraft()
     const second = getDemoRetailerDraft()

@@ -19,14 +19,13 @@ import type { CheckoutDraft, WholesaleOrder } from "./domain/checkout"
 import {
   addCartItem,
   cartBoxCount,
-  cartSubtotal,
   cartUnitCount,
   changeCartQuantity,
   removeCartItem,
 } from "./services/cart"
 import { filterProducts } from "./services/catalog"
 import { createWholesaleOrder, emptyCheckoutDraft, restoreOrderCart } from "./services/checkout"
-import { getProductAvailability } from "./services/commercial"
+import { buildExampleCart, calculateCommercialTotals, getProductAvailability } from "./services/commercial"
 
 type AppView = "storefront" | "checkout" | "confirmation" | "orders" | "order-detail"
 
@@ -75,12 +74,12 @@ export default function App() {
   const activeCategoryName = categories.find((category) => category.handle === activeCategory)?.name
   const cartCount = cartBoxCount(cartLines)
   const cartUnits = cartUnitCount(cartLines)
-  const subtotal = cartSubtotal(cartLines)
+  const commercialTotals = useMemo(() => calculateCommercialTotals(cartLines), [cartLines])
   const cartTotals = useMemo(() => ({
     boxCount: cartCount,
     unitCount: cartUnits,
-    merchandiseSubtotal: subtotal,
-  }), [cartCount, cartUnits, subtotal])
+    merchandiseSubtotal: commercialTotals.merchandiseSubtotal,
+  }), [cartCount, cartUnits, commercialTotals.merchandiseSubtotal])
 
   const closeQuickView = useCallback(() => setQuickViewProduct(null), [])
   const closeCart = useCallback(() => setCartOpen(false), [])
@@ -108,6 +107,15 @@ export default function App() {
   function resetFilters() {
     setQuery("")
     setActiveCategory("all")
+  }
+
+  function loadExampleOrder() {
+    const example = buildExampleCart(products)
+    setCartLines(example.lines)
+    setCartOpen(true)
+    setReorderNotice(example.missingProductIds.length > 0
+      ? `Alguns itens de demonstração não foram encontrados: ${example.missingProductIds.join(", ")}.`
+      : "Pedido de exemplo carregado com dados de demonstração.")
   }
 
   function showStorefront(openCart = false) {
@@ -262,11 +270,11 @@ export default function App() {
       <CartDrawer
         open={cartOpen}
         lines={cartLines}
-        subtotal={subtotal}
         boxCount={cartCount}
         unitCount={cartUnits}
         onClose={closeCart}
         onCheckout={startCheckout}
+        onLoadExampleOrder={loadExampleOrder}
         onQuantityChange={(productId, delta) => setCartLines((current) => changeCartQuantity(current, productId, delta))}
         onRemove={(productId) => setCartLines((current) => removeCartItem(current, productId))}
       />
