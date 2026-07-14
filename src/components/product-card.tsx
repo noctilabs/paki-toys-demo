@@ -1,17 +1,19 @@
 import type { Product } from "../domain/catalog"
+import { AvailabilityBadge } from "./commercial-badges"
 import { EyeIcon, HeartIcon, PlusIcon } from "./icons"
 
 const currency = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" })
 
 type ProductCardProps = {
   product: Product
+  availableBoxes?: number
   favorite: boolean
   onFavorite: (productId: string) => void
   onQuickView: (product: Product) => void
   onAdd: (product: Product) => void
 }
 
-export function ProductCard({ product, favorite, onFavorite, onQuickView, onAdd }: ProductCardProps) {
+export function ProductCard({ product, availableBoxes, favorite, onFavorite, onQuickView, onAdd }: ProductCardProps) {
   return (
     <article className="product-card">
       <div className="product-card__visual">
@@ -28,8 +30,9 @@ export function ProductCard({ product, favorite, onFavorite, onQuickView, onAdd 
         <div className="product-meta"><span>{product.category}</span><span>{product.age}</span></div>
         <button className="product-title" type="button" onClick={() => onQuickView(product)}>{product.title}</button>
         <p>{product.description}</p>
+        <AvailabilityBadge availableBoxes={availableBoxes} />
         <div className="product-card__footer">
-          <div className="product-price"><small>A partir de</small><strong>{currency.format(product.price)}</strong></div>
+          <div className="product-price"><small className="commercial-label">Preço Parceiro · por unidade</small><strong>{currency.format(product.price)}</strong></div>
           <button className="add-button" type="button" onClick={() => onAdd(product)} aria-label={`Adicionar ${product.title} à sacola`}><PlusIcon /></button>
         </div>
       </div>

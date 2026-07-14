@@ -26,6 +26,7 @@ import {
 } from "./services/cart"
 import { filterProducts } from "./services/catalog"
 import { createWholesaleOrder, emptyCheckoutDraft, restoreOrderCart } from "./services/checkout"
+import { getProductAvailability } from "./services/commercial"
 
 type AppView = "storefront" | "checkout" | "confirmation" | "orders" | "order-detail"
 
@@ -247,6 +248,7 @@ export default function App() {
           products={visibleProducts}
           favorites={favorites}
           activeCategoryName={activeCategoryName}
+          getAvailability={getProductAvailability}
           onFavorite={toggleFavorite}
           onQuickView={setQuickViewProduct}
           onAdd={addProduct}

@@ -845,6 +845,8 @@ img {
 .product-card {
   min-width: 0;
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
   border: 1px solid rgba(31,47,150,.1);
   border-radius: 28px;
   background: var(--white);
@@ -964,6 +966,9 @@ img {
 }
 
 .product-card__body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
   padding: 20px;
 }
 
@@ -1025,6 +1030,7 @@ img {
   gap: 14px;
   padding-top: 15px;
   border-top: 1px solid var(--line);
+  margin-top: auto;
 }
 
 .product-price small {
@@ -1598,6 +1604,123 @@ img {
   font-size: 10px;
   line-height: 1.5;
 }
+
+.commercial-label {
+  color: var(--red) !important;
+  font-weight: 900 !important;
+  letter-spacing: .055em !important;
+}
+
+.availability-badge {
+  width: fit-content;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 9px;
+  border: 1px solid rgba(38, 133, 76, .18);
+  border-radius: 999px;
+  color: #22623b;
+  background: #edf8f0;
+  font-size: 9px;
+  font-weight: 850;
+  letter-spacing: .025em;
+}
+
+.availability-badge__dot {
+  width: 6px;
+  height: 6px;
+  flex: 0 0 6px;
+  border-radius: 50%;
+  background: #31a35e;
+  box-shadow: 0 0 0 3px rgba(49, 163, 94, .12);
+}
+
+.availability-badge--review {
+  border-color: rgba(175, 111, 17, .2);
+  color: #80550f;
+  background: #fff8e4;
+}
+
+.availability-badge--review .availability-badge__dot { background: #d99a2b; }
+
+.retailer-tier {
+  width: fit-content;
+  display: inline-flex;
+  align-items: center;
+  padding: 7px 10px;
+  border: 1px solid rgba(158, 115, 9, .24);
+  border-radius: 999px;
+  color: #6e4c00;
+  background: linear-gradient(135deg, #fff6c9, #ffe89a);
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+
+.product-card__body > .availability-badge { margin: -5px 0 14px; }
+
+.volume-tier-table {
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: #fbfcff;
+}
+
+.volume-tier-table__heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--line);
+}
+
+.volume-tier-table__heading strong { font-size: 11px; }
+.volume-tier-table__heading span { color: var(--muted); font-size: 8px; font-weight: 800; text-transform: uppercase; }
+.volume-tier-table table { width: 100%; border-collapse: collapse; font-size: 10px; }
+.volume-tier-table th,
+.volume-tier-table td { padding: 9px 14px; text-align: left; }
+.volume-tier-table th { color: var(--muted); font-size: 8px; letter-spacing: .06em; text-transform: uppercase; }
+.volume-tier-table tbody tr + tr { border-top: 1px solid var(--line); }
+.volume-tier-table tbody tr.is-active { color: var(--navy); background: var(--sky); }
+.volume-tier-table td:last-child { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.volume-tier-table td span { color: var(--red); font-size: 8px; font-weight: 900; text-transform: uppercase; }
+
+.quick-view__commercial {
+  display: grid;
+  gap: 12px;
+  margin-bottom: 22px;
+}
+
+.quick-view__commercial-head,
+.quick-view__price-grid {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.quick-view__price-grid > div {
+  flex: 1;
+  padding: 11px 13px;
+  border-radius: 14px;
+  background: #f6f7fb;
+}
+
+.quick-view__price-grid small,
+.quick-view__price-grid strong { display: block; }
+.quick-view__price-grid small { margin-bottom: 3px; color: var(--muted); font-size: 8px; font-weight: 800; text-transform: uppercase; }
+.quick-view__price-grid strong { color: var(--navy); font-family: "Fredoka", sans-serif; font-size: 17px; }
+
+.quick-view__savings-example {
+  margin: 0;
+  color: var(--muted);
+  font-size: 10px;
+}
+
+.quick-view__savings-example strong { color: #22623b; }
+.quick-view__savings-example span { display: block; margin-top: 3px; font-size: 8px; text-transform: uppercase; }
 
 .overlay--drawer {
   justify-items: end;

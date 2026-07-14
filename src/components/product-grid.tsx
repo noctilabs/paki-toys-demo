@@ -5,13 +5,14 @@ type ProductGridProps = {
   products: Product[]
   favorites: Set<string>
   activeCategoryName?: string
+  getAvailability: (productId: string) => number | undefined
   onFavorite: (productId: string) => void
   onQuickView: (product: Product) => void
   onAdd: (product: Product) => void
   onReset: () => void
 }
 
-export function ProductGrid({ products, favorites, activeCategoryName, onFavorite, onQuickView, onAdd, onReset }: ProductGridProps) {
+export function ProductGrid({ products, favorites, activeCategoryName, getAvailability, onFavorite, onQuickView, onAdd, onReset }: ProductGridProps) {
   return (
     <section className="products-section" id="produtos" aria-labelledby="products-title">
       <div className="shell">
@@ -29,6 +30,7 @@ export function ProductGrid({ products, favorites, activeCategoryName, onFavorit
               <ProductCard
                 key={product.id}
                 product={product}
+                availableBoxes={getAvailability(product.id)}
                 favorite={favorites.has(product.id)}
                 onFavorite={onFavorite}
                 onQuickView={onQuickView}
