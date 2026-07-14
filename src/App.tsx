@@ -10,7 +10,14 @@ import { QuickView } from "./components/quick-view"
 import { ValueStrip } from "./components/value-strip"
 import { localCatalogRepository } from "./data/catalog-repository"
 import type { CartLine, Category, Product } from "./domain/catalog"
-import { addCartItem, cartItemCount, cartSubtotal, changeCartQuantity, removeCartItem } from "./services/cart"
+import {
+  addCartItem,
+  cartBoxCount,
+  cartSubtotal,
+  cartUnitCount,
+  changeCartQuantity,
+  removeCartItem,
+} from "./services/cart"
 import { filterProducts } from "./services/catalog"
 
 export default function App() {
@@ -37,7 +44,8 @@ export default function App() {
     [products, query, activeCategory],
   )
   const activeCategoryName = categories.find((category) => category.handle === activeCategory)?.name
-  const cartCount = cartItemCount(cartLines)
+  const cartCount = cartBoxCount(cartLines)
+  const cartUnits = cartUnitCount(cartLines)
   const subtotal = cartSubtotal(cartLines)
 
   const closeQuickView = useCallback(() => setQuickViewProduct(null), [])
@@ -101,7 +109,10 @@ export default function App() {
         open={cartOpen}
         lines={cartLines}
         subtotal={subtotal}
+        boxCount={cartCount}
+        unitCount={cartUnits}
         onClose={closeCart}
+        onCheckout={closeCart}
         onQuantityChange={(productId, delta) => setCartLines((current) => changeCartQuantity(current, productId, delta))}
         onRemove={(productId) => setCartLines((current) => removeCartItem(current, productId))}
       />

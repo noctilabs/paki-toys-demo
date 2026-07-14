@@ -25,9 +25,24 @@ export function removeCartItem(lines: CartLine[], productId: string): CartLine[]
 }
 
 export function cartItemCount(lines: CartLine[]) {
+  return cartBoxCount(lines)
+}
+
+export function cartBoxCount(lines: CartLine[]) {
   return lines.reduce((total, line) => total + line.quantity, 0)
 }
 
+export function cartUnitCount(lines: CartLine[]) {
+  return lines.reduce(
+    (total, line) => total + line.quantity * line.product.masterQuantity,
+    0,
+  )
+}
+
+export function cartLineSubtotal(line: CartLine) {
+  return Math.round(line.product.price * line.product.masterQuantity * line.quantity * 100) / 100
+}
+
 export function cartSubtotal(lines: CartLine[]) {
-  return lines.reduce((total, line) => total + line.product.price * line.quantity, 0)
+  return lines.reduce((total, line) => total + cartLineSubtotal(line), 0)
 }

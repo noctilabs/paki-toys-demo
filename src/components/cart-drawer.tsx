@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react"
 import type { CartLine } from "../domain/catalog"
+import { cartLineSubtotal } from "../services/cart"
 import { BagIcon, CloseIcon, MinusIcon, PlusIcon, TrashIcon } from "./icons"
 
 const currency = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" })
@@ -8,12 +9,25 @@ type CartDrawerProps = {
   open: boolean
   lines: CartLine[]
   subtotal: number
+  boxCount: number
+  unitCount: number
   onClose: () => void
+  onCheckout: () => void
   onQuantityChange: (productId: string, delta: number) => void
   onRemove: (productId: string) => void
 }
 
-export function CartDrawer({ open, lines, subtotal, onClose, onQuantityChange, onRemove }: CartDrawerProps) {
+export function CartDrawer({
+  open,
+  lines,
+  subtotal,
+  boxCount,
+  unitCount,
+  onClose,
+  onCheckout,
+  onQuantityChange,
+  onRemove,
+}: CartDrawerProps) {
   const closeRef = useRef<HTMLButtonElement>(null)
 
   useEffect(() => {
@@ -57,12 +71,17 @@ export function CartDrawer({ open, lines, subtotal, onClose, onQuantityChange, o
                   <div className="cart-line__content">
                     <span>{product.category}</span>
                     <h3>{product.title}</h3>
-                    <strong>{currency.format(product.price)}</strong>
+                    <strong>{currency.format(product.price)} <small>por unidade</small></strong>
+                    <dl className="cart-line__wholesale">
+                      <div><dt>Unidades/caixa</dt><dd>{product.masterQuantity}</dd></div>
+                      <div><dt>Total de unidades</dt><dd>{product.masterQuantity * quantity}</dd></div>
+                      <div><dt>Subtotal</dt><dd>{currency.format(cartLineSubtotal({ product, quantity }))}</dd></div>
+                    </dl>
                     <div className="cart-line__actions">
-                      <div className="quantity" aria-label={`Quantidade de ${product.title}`}>
-                        <button type="button" onClick={() => onQuantityChange(product.id, -1)} aria-label="Diminuir quantidade"><MinusIcon /></button>
+                      <div className="quantity" aria-label={`Caixas de ${product.title}`}>
+                        <button type="button" onClick={() => onQuantityChange(product.id, -1)} aria-label="Diminuir caixas"><MinusIcon /></button>
                         <span aria-live="polite">{quantity}</span>
-                        <button type="button" onClick={() => onQuantityChange(product.id, 1)} aria-label="Aumentar quantidade"><PlusIcon /></button>
+                        <button type="button" onClick={() => onQuantityChange(product.id, 1)} aria-label="Aumentar caixas"><PlusIcon /></button>
                       </div>
                       <button className="remove-button" type="button" onClick={() => onRemove(product.id)} aria-label={`Remover ${product.title}`}><TrashIcon /></button>
                     </div>
@@ -71,9 +90,13 @@ export function CartDrawer({ open, lines, subtotal, onClose, onQuantityChange, o
               ))}
             </div>
             <div className="cart-summary">
-              <div><span>Subtotal</span><strong>{currency.format(subtotal)}</strong></div>
-              <p>Frete e condições comerciais serão calculados na experiência final.</p>
-              <button className="button button--red button--full" type="button" disabled>Finalizar compra — demonstração</button>
+              <div className="cart-summary__counts">
+                <span><strong>{boxCount}</strong> {boxCount === 1 ? "caixa" : "caixas"}</span>
+                <span><strong>{unitCount}</strong> unidades</span>
+              </div>
+              <div><span>Subtotal de mercadorias</span><strong>{currency.format(subtotal)}</strong></div>
+              <p>Frete e condições comerciais serão confirmados pela equipe Paki após a análise.</p>
+              <button className="button button--red button--full" type="button" onClick={onCheckout}>Continuar para o pedido</button>
             </div>
           </>
         )}

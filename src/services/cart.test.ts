@@ -1,6 +1,15 @@
 import { describe, expect, it } from "vitest"
 import type { CartLine, Product } from "../domain/catalog"
-import { addCartItem, cartItemCount, cartSubtotal, changeCartQuantity, removeCartItem } from "./cart"
+import {
+  addCartItem,
+  cartBoxCount,
+  cartItemCount,
+  cartLineSubtotal,
+  cartSubtotal,
+  cartUnitCount,
+  changeCartQuantity,
+  removeCartItem,
+} from "./cart"
 
 const product: Product = {
   id: "1214",
@@ -42,7 +51,16 @@ describe("cart services", () => {
   it("calculates quantity and subtotal", () => {
     const cart = [{ product, quantity: 2 }]
     expect(cartItemCount(cart)).toBe(2)
-    expect(cartSubtotal(cart)).toBe(239.8)
+    expect(cartSubtotal(cart)).toBe(1438.8)
+  })
+
+  it("calculates wholesale cartons, units, and merchandise subtotal", () => {
+    const cart = [{ product: { ...product, price: 10, masterQuantity: 6 }, quantity: 2 }]
+
+    expect(cartBoxCount(cart)).toBe(2)
+    expect(cartUnitCount(cart)).toBe(12)
+    expect(cartLineSubtotal(cart[0])).toBe(120)
+    expect(cartSubtotal(cart)).toBe(120)
   })
 
   it("removes a product explicitly", () => {
