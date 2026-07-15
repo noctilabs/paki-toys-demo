@@ -2304,6 +2304,81 @@ img {
 .order-summary__note { margin: 16px 0 0; padding: 11px; border-radius: 10px; color: var(--muted); background: #f5f5fa; font-size: 9px; line-height: 1.5; }
 .order-summary > .minimum-progress { margin-bottom: 0; }
 
+.demo-fill-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 22px;
+  padding: 14px;
+  border: 1px dashed rgba(31, 47, 150, .24);
+  border-radius: 16px;
+  background: rgba(237, 247, 255, .55);
+}
+
+.demo-fill-row .demo-action {
+  min-height: 42px;
+  padding: 9px 14px;
+  border: 0;
+  color: var(--navy);
+  background: transparent;
+  font-size: 10px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.freight-options {
+  min-width: 0;
+  margin: 26px 0 0;
+  padding: 0;
+  border: 0;
+}
+
+.freight-options legend { padding: 0; color: var(--ink); font-family: "Fredoka", sans-serif; font-size: 20px; font-weight: 700; }
+.freight-options > p { margin: 4px 0 13px; color: var(--muted); font-size: 9px; font-weight: 800; text-transform: uppercase; }
+.freight-options__grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 9px; }
+
+.freight-card {
+  position: relative;
+  min-width: 0;
+  display: grid;
+  gap: 7px;
+  padding: 15px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--white);
+  cursor: pointer;
+  transition: border-color .2s var(--ease), box-shadow .2s var(--ease), transform .2s var(--ease);
+}
+
+.freight-card:hover { transform: translateY(-2px); border-color: rgba(31, 47, 150, .32); }
+.freight-card.is-selected { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(31, 47, 150, .08); }
+.freight-card input { position: absolute; inset: 12px 12px auto auto; accent-color: var(--blue); }
+.freight-card > span { display: grid; gap: 3px; padding-right: 20px; }
+.freight-card > span strong { font-size: 11px; line-height: 1.25; }
+.freight-card > span b { color: var(--navy); font-family: "Fredoka", sans-serif; font-size: 16px; }
+.freight-card em { color: var(--red); font-size: 9px; font-style: normal; font-weight: 900; }
+.freight-card small { color: var(--muted); font-size: 8px; line-height: 1.45; }
+
+.commercial-support {
+  display: grid;
+  gap: 12px;
+  padding: 18px;
+  border: 1px solid rgba(31, 47, 150, .12);
+  border-radius: 18px;
+  background: linear-gradient(135deg, #f8fbff, #eef7ff);
+}
+
+.commercial-support h3 { margin: 5px 0; font-family: "Fredoka", sans-serif; font-size: 19px; }
+.commercial-support p { margin: 0; color: var(--muted); font-size: 10px; line-height: 1.55; }
+.commercial-support .text-button { width: fit-content; padding: 0; border: 0; color: var(--navy); background: transparent; font-size: 10px; font-weight: 900; text-decoration: underline; cursor: pointer; }
+.commercial-support .commercial-support__message { padding: 11px; border-radius: 10px; color: var(--ink); background: var(--white); }
+
+@media (max-width: 640px) {
+  .demo-fill-row { align-items: flex-start; flex-direction: column; }
+  .freight-options__grid { grid-template-columns: 1fr; }
+}
+
 .simple-app-view {
   display: grid;
   place-content: center;

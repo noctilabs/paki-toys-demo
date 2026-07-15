@@ -59,6 +59,7 @@ export function OrderSummary({
         totalUnits: product.masterQuantity * quantity,
         lineSubtotal: pricing.netSubtotal,
         listValue: pricing.listValue,
+        discountRate: pricing.discountRate,
         discountLabel: pricing.discountLabel,
         savings: pricing.savings,
         netSubtotal: pricing.netSubtotal,

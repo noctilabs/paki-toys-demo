@@ -12,6 +12,7 @@ import {
   validateCheckoutStep,
   validateCompany,
   validateDelivery,
+  validateFreight,
   validateTerms,
 } from "./checkout"
 
@@ -55,6 +56,8 @@ const validDraft: CheckoutDraft = {
     contactName: "Recebimento Aurora",
     instructions: "Entregar pela doca lateral.",
   },
+  commercialTier: "gold",
+  freightOptionId: "express",
   paymentTerm: "pix",
 }
 
@@ -94,6 +97,12 @@ describe("checkout services", () => {
     expect(canSubmitCheckout(validDraft, [])).toBe(false)
   })
 
+  it("requires an illustrative freight option", () => {
+    expect(validateFreight("")).toEqual({ freightOptionId: "Escolha uma opção de entrega." })
+    expect(validateFreight("express")).toEqual({})
+    expect(canSubmitCheckout({ ...validDraft, freightOptionId: "" }, cart)).toBe(false)
+  })
+
   it("validates only the active checkout step", () => {
     expect(validateCheckoutStep("company", validDraft)).toEqual({})
     expect(validateCheckoutStep("delivery", validDraft)).toEqual({})
@@ -115,6 +124,8 @@ describe("checkout services", () => {
     expect(order.reference).toBe("PK-ABC12345")
     expect(order.status).toBe("received")
     expect(order.freightStatus).toBe("pending")
+    expect(order.commercialTier).toBe("gold")
+    expect(order.freight).toMatchObject({ id: "express", price: 329 })
     expect(order.lines[0]).toMatchObject({
       productId: product.id,
       unitPrice: 10,
@@ -122,8 +133,18 @@ describe("checkout services", () => {
       boxCount: 2,
       totalUnits: 12,
       lineSubtotal: 120,
+      listValue: 120,
+      savings: 0,
+      netSubtotal: 120,
     })
     expect(order.totals).toEqual({ boxCount: 2, unitCount: 12, merchandiseSubtotal: 120 })
+    expect(order.commercialTotals).toEqual({
+      listValue: 120,
+      savings: 0,
+      merchandiseSubtotal: 120,
+      freightTotal: 329,
+      estimatedTotal: 449,
+    })
 
     localProduct.title = "Alterado depois"
     expect(order.lines[0].title).toBe("Dino Truck")

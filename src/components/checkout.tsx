@@ -2,6 +2,10 @@ import { useEffect, useRef, useState, type FormEvent, type ReactNode } from "rea
 import type { CartLine } from "../domain/catalog"
 import type { CheckoutDraft, CompanyDetails, DeliveryAddress, OrderTotals, PaymentTerm } from "../domain/checkout"
 import { validateCheckoutStep, type CheckoutStep } from "../services/checkout"
+import { calculateCommercialTotals, getDemoRetailerDraft, getFreightOption } from "../services/commercial"
+import { CommercialSupportCard } from "./commercial-support-card"
+import { RetailerTierBadge } from "./commercial-badges"
+import { FreightOptions } from "./freight-options"
 import { OrderSummary } from "./order-summary"
 
 const steps: Array<{ key: CheckoutStep; number: string; label: string }> = [
@@ -75,6 +79,7 @@ function ReviewBlock({ title, action, children }: { title: string; action: () =>
 export function Checkout({ lines, totals, draft, submitting, submitError, onDraftChange, onSubmit, onCancel }: CheckoutProps) {
   const [stepIndex, setStepIndex] = useState(0)
   const [errors, setErrors] = useState<Record<string, string>>({})
+  const [liveMessage, setLiveMessage] = useState("")
   const headingRef = useRef<HTMLHeadingElement>(null)
   const step = steps[stepIndex]
 
@@ -96,6 +101,12 @@ export function Checkout({ lines, totals, draft, submitting, submitError, onDraf
   function goToStep(index: number) {
     setErrors({})
     setStepIndex(index)
+  }
+
+  function fillDemoRetailer() {
+    onDraftChange(getDemoRetailerDraft())
+    setErrors({})
+    setLiveMessage("Dados de demonstração preenchidos")
   }
 
   function advance() {
@@ -151,19 +162,27 @@ export function Checkout({ lines, totals, draft, submitting, submitError, onDraf
           </div>
 
           {step.key === "company" && (
-            <div className="field-grid">
+            <>
+              <div className="demo-fill-row">
+                <button className="button demo-action" type="button" onClick={fillDemoRetailer}>Preencher com empresa de demonstração</button>
+                <RetailerTierBadge />
+              </div>
+              <div className="field-grid">
               <Field name="cnpj" label="CNPJ" value={draft.company.cnpj} error={errors.cnpj} required inputMode="numeric" autoComplete="organization" placeholder="11.222.333/0001-81" onChange={(value) => updateCompany("cnpj", value)} />
               <Field name="stateRegistration" label="Inscrição estadual" value={draft.company.stateRegistration} autoComplete="off" placeholder="Opcional" onChange={(value) => updateCompany("stateRegistration", value)} />
               <div className="field--wide"><Field name="legalName" label="Razão social" value={draft.company.legalName} error={errors.legalName} required autoComplete="organization" onChange={(value) => updateCompany("legalName", value)} /></div>
               <div className="field--wide"><Field name="tradeName" label="Nome fantasia" value={draft.company.tradeName} autoComplete="organization" placeholder="Opcional" onChange={(value) => updateCompany("tradeName", value)} /></div>
               <Field name="buyerName" label="Nome do comprador" value={draft.company.buyerName} error={errors.buyerName} required autoComplete="name" onChange={(value) => updateCompany("buyerName", value)} />
               <Field name="phone" label="Telefone / WhatsApp" value={draft.company.phone} error={errors.phone} required inputMode="tel" autoComplete="tel" placeholder="(11) 99876-5432" onChange={(value) => updateCompany("phone", value)} />
-              <div className="field--wide"><Field name="email" label="E-mail comercial" value={draft.company.email} error={errors.email} required inputMode="email" autoComplete="email" placeholder="compras@sualoja.com.br" onChange={(value) => updateCompany("email", value)} /></div>
-            </div>
+                <div className="field--wide"><Field name="email" label="E-mail comercial" value={draft.company.email} error={errors.email} required inputMode="email" autoComplete="email" placeholder="compras@sualoja.com.br" onChange={(value) => updateCompany("email", value)} /></div>
+              </div>
+              <p className="sr-only" aria-live="polite">{liveMessage}</p>
+            </>
           )}
 
           {step.key === "delivery" && (
-            <div className="field-grid">
+            <>
+              <div className="field-grid">
               <Field name="postalCode" label="CEP" value={draft.delivery.postalCode} error={errors.postalCode} required inputMode="numeric" autoComplete="postal-code" placeholder="01310-100" onChange={(value) => updateDelivery("postalCode", value)} />
               <Field name="state" label="UF" value={draft.delivery.state} error={errors.state} required autoComplete="address-level1" placeholder="SP" onChange={(value) => updateDelivery("state", value)} />
               <div className="field--wide"><Field name="street" label="Endereço" value={draft.delivery.street} error={errors.street} required autoComplete="address-line1" onChange={(value) => updateDelivery("street", value)} /></div>
@@ -172,8 +191,17 @@ export function Checkout({ lines, totals, draft, submitting, submitError, onDraf
               <Field name="neighborhood" label="Bairro" value={draft.delivery.neighborhood} error={errors.neighborhood} required autoComplete="address-level3" onChange={(value) => updateDelivery("neighborhood", value)} />
               <Field name="city" label="Cidade" value={draft.delivery.city} error={errors.city} required autoComplete="address-level2" onChange={(value) => updateDelivery("city", value)} />
               <div className="field--wide"><Field name="contactName" label="Contato no recebimento" value={draft.delivery.contactName} error={errors.contactName} required autoComplete="name" onChange={(value) => updateDelivery("contactName", value)} /></div>
-              <label className="field field--wide"><span>Instruções de entrega</span><textarea value={draft.delivery.instructions} placeholder="Opcional: doca, horários ou referências" onChange={(event) => updateDelivery("instructions", event.target.value)} /></label>
-            </div>
+                <label className="field field--wide"><span>Instruções de entrega</span><textarea value={draft.delivery.instructions} placeholder="Opcional: doca, horários ou referências" onChange={(event) => updateDelivery("instructions", event.target.value)} /></label>
+              </div>
+              <FreightOptions
+                value={draft.freightOptionId}
+                error={errors.freightOptionId}
+                onChange={(freightOptionId) => {
+                  onDraftChange({ ...draft, freightOptionId })
+                  setErrors((current) => ({ ...current, freightOptionId: "" }))
+                }}
+              />
+            </>
           )}
 
           {step.key === "terms" && (
@@ -190,10 +218,11 @@ export function Checkout({ lines, totals, draft, submitting, submitError, onDraf
 
           {step.key === "review" && (
             <div className="review-grid">
-              <ReviewBlock title="Empresa" action={() => goToStep(0)}><p><strong>{draft.company.tradeName || draft.company.legalName}</strong><br />{draft.company.legalName}<br />CNPJ {draft.company.cnpj}<br />{draft.company.buyerName} · {draft.company.email}<br />{draft.company.phone}</p></ReviewBlock>
-              <ReviewBlock title="Entrega" action={() => goToStep(1)}><p><strong>{draft.delivery.street}, {draft.delivery.number}</strong>{draft.delivery.complement && ` · ${draft.delivery.complement}`}<br />{draft.delivery.neighborhood} · {draft.delivery.city}/{draft.delivery.state}<br />CEP {draft.delivery.postalCode}<br />Contato: {draft.delivery.contactName}</p></ReviewBlock>
+              <ReviewBlock title="Empresa" action={() => goToStep(0)}><RetailerTierBadge /><p><strong>{draft.company.tradeName || draft.company.legalName}</strong><br />{draft.company.legalName}<br />CNPJ {draft.company.cnpj}<br />{draft.company.buyerName} · {draft.company.email}<br />{draft.company.phone}</p></ReviewBlock>
+              <ReviewBlock title="Entrega" action={() => goToStep(1)}><p><strong>{draft.delivery.street}, {draft.delivery.number}</strong>{draft.delivery.complement && ` · ${draft.delivery.complement}`}<br />{draft.delivery.neighborhood} · {draft.delivery.city}/{draft.delivery.state}<br />CEP {draft.delivery.postalCode}<br />Contato: {draft.delivery.contactName}<br /><br /><strong>{getFreightOption(draft.freightOptionId)?.title}</strong> · {getFreightOption(draft.freightOptionId)?.estimate}</p></ReviewBlock>
               <ReviewBlock title="Condição comercial" action={() => goToStep(2)}><p><strong>{termOptions.find(({ value }) => value === draft.paymentTerm)?.title}</strong><br />Preferência sujeita à análise e confirmação da Paki Toys.</p></ReviewBlock>
               <div className="review-notice"><strong>Este é um ambiente de demonstração.</strong><p>Ao enviar, nenhum pedido real, cobrança ou reserva de estoque será criado.</p></div>
+              <CommercialSupportCard />
             </div>
           )}
 
@@ -205,7 +234,7 @@ export function Checkout({ lines, totals, draft, submitting, submitError, onDraf
           </div>
         </form>
 
-        <aside className="checkout-summary"><OrderSummary cartLines={lines} totals={totals} compact /></aside>
+        <aside className="checkout-summary"><OrderSummary cartLines={lines} totals={totals} commercialTotals={calculateCommercialTotals(lines, draft.freightOptionId)} freightTitle={getFreightOption(draft.freightOptionId)?.title} compact /></aside>
       </div>
     </main>
   )

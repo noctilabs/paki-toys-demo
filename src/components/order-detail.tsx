@@ -1,5 +1,7 @@
 import type { WholesaleOrder } from "../domain/checkout"
 import { orderStatusSteps, paymentTermLabel } from "../services/checkout"
+import { CommercialSupportCard } from "./commercial-support-card"
+import { RetailerTierBadge } from "./commercial-badges"
 import { OrderSummary } from "./order-summary"
 
 const dateTime = new Intl.DateTimeFormat("pt-BR", { dateStyle: "long", timeStyle: "short" })
@@ -43,11 +45,12 @@ export function OrderDetail({ order, reorderNotice, onBack, onReorder, onStorefr
 
       <div className="order-detail-grid">
         <div className="order-detail-info">
-          <section><span className="section-kicker">Empresa</span><h2>{order.company.tradeName || order.company.legalName}</h2><p>{order.company.legalName}<br />CNPJ {order.company.cnpj}{order.company.stateRegistration && <><br />IE {order.company.stateRegistration}</>}<br /><br /><strong>Comprador</strong><br />{order.company.buyerName}<br />{order.company.email}<br />{order.company.phone}</p></section>
+          <section><span className="section-kicker">Empresa</span><h2>{order.company.tradeName || order.company.legalName}</h2><RetailerTierBadge /><p>{order.company.legalName}<br />CNPJ {order.company.cnpj}{order.company.stateRegistration && <><br />IE {order.company.stateRegistration}</>}<br /><br /><strong>Comprador</strong><br />{order.company.buyerName}<br />{order.company.email}<br />{order.company.phone}</p></section>
           <section><span className="section-kicker">Entrega</span><h2>{order.delivery.city}/{order.delivery.state}</h2><p>{order.delivery.street}, {order.delivery.number}{order.delivery.complement && ` · ${order.delivery.complement}`}<br />{order.delivery.neighborhood}<br />CEP {order.delivery.postalCode}<br /><br /><strong>Recebimento</strong><br />{order.delivery.contactName}{order.delivery.instructions && <><br />{order.delivery.instructions}</>}</p></section>
-          <section><span className="section-kicker">Condição</span><h2>{paymentTermLabel(order.paymentTerm)}</h2><p>Preferência registrada para análise. Não representa aprovação de crédito ou cobrança.</p><span className="freight-chip">Frete · A calcular</span></section>
+          <section><span className="section-kicker">Condição</span><h2>{paymentTermLabel(order.paymentTerm)}</h2><p>Preferência registrada para análise. Não representa aprovação de crédito ou cobrança.</p><span className="freight-chip">{order.freight ? `${order.freight.title} · ${order.freight.estimate}` : "Frete sob consulta"}</span></section>
+          <CommercialSupportCard />
         </div>
-        <OrderSummary orderLines={order.lines} totals={order.totals} />
+        <OrderSummary orderLines={order.lines} totals={order.totals} commercialTotals={order.commercialTotals} freightTitle={order.freight?.title} />
       </div>
 
       <footer className="order-document__footer"><img src="/paki/logo.webp" alt="Paki Toys" /><p>Resumo de demonstração · nenhum pedido real foi criado.</p><strong>{order.reference}</strong></footer>

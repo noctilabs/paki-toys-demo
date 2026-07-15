@@ -1,3 +1,5 @@
+import type { CommercialOrderTotals, CommercialTier, FreightOption } from "./commercial"
+
 export type PaymentTerm = "pix" | "boleto-28" | "commercial"
 
 export type WholesaleOrderStatus =
@@ -33,6 +35,8 @@ export type DeliveryAddress = {
 export type CheckoutDraft = {
   company: CompanyDetails
   delivery: DeliveryAddress
+  commercialTier: CommercialTier
+  freightOptionId: FreightOption["id"] | ""
   paymentTerm: PaymentTerm | ""
 }
 
@@ -47,6 +51,11 @@ export type WholesaleOrderLine = {
   boxCount: number
   totalUnits: number
   lineSubtotal: number
+  listValue: number
+  discountRate: number
+  discountLabel: string
+  savings: number
+  netSubtotal: number
 }
 
 export type OrderTotals = {
@@ -64,8 +73,11 @@ export type WholesaleOrder = {
   company: CompanyDetails
   delivery: DeliveryAddress
   paymentTerm: PaymentTerm
+  commercialTier: CommercialTier
+  freight: FreightOption
   lines: WholesaleOrderLine[]
   totals: OrderTotals
+  commercialTotals: CommercialOrderTotals
 }
 
 export type StatusStepState = "complete" | "current" | "upcoming"

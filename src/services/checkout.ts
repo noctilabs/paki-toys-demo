@@ -10,7 +10,9 @@ import type {
   WholesaleOrderLine,
   WholesaleOrderStatus,
 } from "../domain/checkout"
-import { cartBoxCount, cartLineSubtotal, cartSubtotal, cartUnitCount } from "./cart"
+import type { FreightOption } from "../domain/commercial"
+import { cartBoxCount, cartUnitCount } from "./cart"
+import { calculateCommercialTotals, getFreightOption, priceCommercialLine } from "./commercial"
 
 const statusDefinitions: Array<Pick<OrderStatusStep, "status" | "label" | "description">> = [
   { status: "received", label: "Pedido recebido", description: "Recebemos sua solicitação para análise." },
@@ -48,6 +50,8 @@ export const emptyCheckoutDraft: CheckoutDraft = {
     contactName: "",
     instructions: "",
   },
+  commercialTier: "gold",
+  freightOptionId: "",
   paymentTerm: "",
 }
 
@@ -97,6 +101,10 @@ export function validateTerms(paymentTerm: PaymentTerm | "") {
   return paymentTerm ? {} : { paymentTerm: "Escolha uma condição comercial." }
 }
 
+export function validateFreight(freightOptionId: FreightOption["id"] | "") {
+  return freightOptionId ? {} : { freightOptionId: "Escolha uma opção de entrega." }
+}
+
 export function paymentTermLabel(paymentTerm: PaymentTerm) {
   return paymentTermLabels[paymentTerm]
 }
@@ -105,7 +113,7 @@ export type CheckoutStep = "company" | "delivery" | "terms" | "review"
 
 export function validateCheckoutStep(step: CheckoutStep, draft: CheckoutDraft) {
   if (step === "company") return validateCompany(draft.company)
-  if (step === "delivery") return validateDelivery(draft.delivery)
+  if (step === "delivery") return { ...validateDelivery(draft.delivery), ...validateFreight(draft.freightOptionId) }
   if (step === "terms") return validateTerms(draft.paymentTerm)
   return {}
 }
@@ -114,10 +122,12 @@ export function canSubmitCheckout(draft: CheckoutDraft, lines: CartLine[]) {
   return lines.length > 0
     && Object.keys(validateCompany(draft.company)).length === 0
     && Object.keys(validateDelivery(draft.delivery)).length === 0
+    && Object.keys(validateFreight(draft.freightOptionId)).length === 0
     && Object.keys(validateTerms(draft.paymentTerm)).length === 0
 }
 
 function createOrderLine({ product, quantity }: CartLine): WholesaleOrderLine {
+  const pricing = priceCommercialLine({ product, quantity })
   return {
     productId: product.id,
     handle: product.handle,
@@ -128,7 +138,12 @@ function createOrderLine({ product, quantity }: CartLine): WholesaleOrderLine {
     unitsPerBox: product.masterQuantity,
     boxCount: quantity,
     totalUnits: product.masterQuantity * quantity,
-    lineSubtotal: cartLineSubtotal({ product, quantity }),
+    lineSubtotal: pricing.netSubtotal,
+    listValue: pricing.listValue,
+    discountRate: pricing.discountRate,
+    discountLabel: pricing.discountLabel,
+    savings: pricing.savings,
+    netSubtotal: pricing.netSubtotal,
   }
 }
 
@@ -157,9 +172,13 @@ export function createWholesaleOrder(
   lines: CartLine[],
   options: CreateOrderOptions = {},
 ): WholesaleOrder {
-  if (!canSubmitCheckout(draft, lines) || !draft.paymentTerm) {
+  if (!canSubmitCheckout(draft, lines) || !draft.paymentTerm || !draft.freightOptionId) {
     throw new Error("Checkout incompleto.")
   }
+
+  const freight = getFreightOption(draft.freightOptionId)
+  if (!freight) throw new Error("Opção de entrega inválida.")
+  const commercialTotals = calculateCommercialTotals(lines, draft.freightOptionId)
 
   return {
     id: options.id ?? createOrderId(),
@@ -170,12 +189,15 @@ export function createWholesaleOrder(
     company: { ...draft.company },
     delivery: { ...draft.delivery, state: draft.delivery.state.toUpperCase() },
     paymentTerm: draft.paymentTerm,
+    commercialTier: draft.commercialTier,
+    freight: { ...freight },
     lines: lines.map(createOrderLine),
     totals: {
       boxCount: cartBoxCount(lines),
       unitCount: cartUnitCount(lines),
-      merchandiseSubtotal: cartSubtotal(lines),
+      merchandiseSubtotal: commercialTotals.merchandiseSubtotal,
     },
+    commercialTotals: { ...commercialTotals },
   }
 }
 

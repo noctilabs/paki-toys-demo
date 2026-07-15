@@ -45,8 +45,23 @@ function makeOrder(id: string, createdAt: string): WholesaleOrder {
       instructions: "",
     },
     paymentTerm: "pix",
+    commercialTier: "gold",
+    freight: {
+      id: "economy",
+      title: "Transportadora econômica",
+      price: 189,
+      estimate: "5–7 dias úteis",
+      description: "Melhor equilíbrio entre prazo e custo.",
+    },
     lines: [],
     totals: { boxCount: 0, unitCount: 0, merchandiseSubtotal: 0 },
+    commercialTotals: {
+      listValue: 0,
+      savings: 0,
+      merchandiseSubtotal: 0,
+      freightTotal: 189,
+      estimatedTotal: 189,
+    },
   }
 }
 

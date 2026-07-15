@@ -33,6 +33,8 @@ function freshCheckoutDraft(): CheckoutDraft {
   return {
     company: { ...emptyCheckoutDraft.company },
     delivery: { ...emptyCheckoutDraft.delivery },
+    commercialTier: "gold",
+    freightOptionId: "",
     paymentTerm: "",
   }
 }
