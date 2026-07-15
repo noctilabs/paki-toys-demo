@@ -19,14 +19,15 @@ export function OrderDetail({ order, reorderNotice, onBack, onReorder, onStorefr
 
   return (
     <main className="order-page order-document">
+      <div className="print-brand"><img src="/paki/logo.webp" alt="Paki Toys" /><span>Resumo comercial de demonstração</span></div>
       <header className="order-page__topbar no-print">
         <button className="checkout-brand" type="button" onClick={onStorefront} aria-label="Voltar à Paki Toys"><img src="/paki/logo.webp" alt="" /><span>Portal do lojista</span></button>
         <button className="text-button" type="button" onClick={onBack}>← Voltar aos pedidos</button>
       </header>
 
       <section className="order-detail-heading">
-        <div><span className="section-kicker">Pedido recebido</span><h1>{order.reference}</h1><p>Enviado em {dateTime.format(new Date(order.createdAt))}</p></div>
-        <div className="order-detail-actions no-print"><button className="button button--ghost" type="button" onClick={() => window.print()}>Imprimir resumo</button><button className="button button--red" type="button" onClick={onReorder}>Comprar novamente</button></div>
+        <div><span className="section-kicker">Pedido recebido · Parceiro Ouro</span><h1>{order.reference}</h1><p>Enviado em {dateTime.format(new Date(order.createdAt))}</p></div>
+        <div className="order-detail-actions no-print"><button className="button button--ghost" type="button" onClick={() => window.print()}>Baixar / imprimir resumo</button><button className="button button--red" type="button" onClick={onReorder}>Comprar novamente</button></div>
       </section>
 
       {reorderNotice && <div className="order-notice" role="status">{reorderNotice}</div>}

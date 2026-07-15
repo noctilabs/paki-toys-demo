@@ -37,7 +37,7 @@ export function OrderHistory({ orders, loading, error, onOpenOrder, onStorefront
               <div className="order-card__reference"><span>Pedido</span><strong>{order.reference}</strong><small>{date.format(new Date(order.createdAt))}</small></div>
               <div><span>Empresa</span><strong>{order.company.tradeName || order.company.legalName}</strong><small>{order.company.legalName}</small></div>
               <div><span>Volumes</span><strong>{order.totals.boxCount} {order.totals.boxCount === 1 ? "caixa" : "caixas"}</strong><small>{order.totals.unitCount} unidades</small></div>
-              <div><span>Mercadorias</span><strong>{currency.format(order.totals.merchandiseSubtotal)}</strong><small>Frete a calcular</small></div>
+              <div><span>Total estimado</span><strong>{currency.format(order.commercialTotals?.estimatedTotal ?? order.totals.merchandiseSubtotal)}</strong><small>{order.freight?.title ?? "Frete sob consulta"}</small></div>
               <div className="order-card__status"><i aria-hidden="true" /><span>Pedido recebido</span><b aria-hidden="true">→</b></div>
             </button>
           ))}

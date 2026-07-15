@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest"
 import type { CartLine, Product } from "../domain/catalog"
 import type { CheckoutDraft } from "../domain/checkout"
+import { demoCommercialPolicy } from "../data/demo-commercial-policy"
+import { priceCommercialLine } from "./commercial"
 import {
   canSubmitCheckout,
   createWholesaleOrder,
@@ -180,5 +182,38 @@ describe("checkout services", () => {
     expect(restored.missingProductTitles).toEqual([])
     expect(missing.lines).toEqual([])
     expect(missing.missingProductTitles).toEqual(["Dino Truck"])
+  })
+
+  it("keeps saved commercial snapshots while reorder uses the current catalog and policy", () => {
+    const draft: CheckoutDraft = {
+      ...validDraft,
+      company: { ...validDraft.company },
+      delivery: { ...validDraft.delivery },
+    }
+    const orderedProduct = { ...product }
+    const order = createWholesaleOrder(draft, [{ product: orderedProduct, quantity: 3 }], {
+      id: "order-snapshot",
+      reference: "PK-SNAPSHOT",
+      createdAt: "2026-07-14T22:00:00.000Z",
+    })
+    const express = demoCommercialPolicy.freightOptions.find(({ id }) => id === "express")!
+    const originalFreightPrice = express.price
+
+    try {
+      express.price = 999
+      orderedProduct.price = 20
+      draft.company.legalName = "Empresa alterada"
+
+      expect(order.freight.price).toBe(329)
+      expect(order.lines[0]).toMatchObject({ listValue: 180, savings: 9, netSubtotal: 171 })
+      expect(order.company.legalName).toBe("Brinquedos Aurora Ltda.")
+
+      const currentProduct = { ...product, price: 20 }
+      const restored = restoreOrderCart(order, [currentProduct])
+      expect(restored.lines).toEqual([{ product: currentProduct, quantity: 3 }])
+      expect(priceCommercialLine(restored.lines[0]).listValue).toBe(360)
+    } finally {
+      express.price = originalFreightPrice
+    }
   })
 })
